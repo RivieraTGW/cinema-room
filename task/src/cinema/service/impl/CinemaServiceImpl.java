@@ -29,7 +29,10 @@ public class CinemaServiceImpl implements CinemaService {
         final List<SeatDTO> availableSeatsDTO = new ArrayList<>();
 
         for (final SeatCoordinates seatCoordinates : availableSeats) {
-            availableSeatsDTO.add(new SeatDTO(seatCoordinates.row(), seatCoordinates.col()));
+            availableSeatsDTO.add(new SeatDTO(
+                    seatCoordinates.row(),
+                    seatCoordinates.col(),
+                    cinemaRepository.getTicketPrice(seatCoordinates.row())));
         }
 
         return new SeatsResponse(cinemaRepository.getNumRows(), cinemaRepository.getNumCols(), availableSeatsDTO);
