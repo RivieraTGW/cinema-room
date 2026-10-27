@@ -2,15 +2,17 @@ package cinema.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import cinema.dto.PurchaseResponse;
 import cinema.dto.SeatDTO;
 import cinema.dto.SeatsResponse;
+import cinema.exception.ErrorMessages;
+import cinema.exception.SeatAlreadyPurchasedException;
 import cinema.repository.CinemaRepository;
 import cinema.service.CinemaService;
-import cinema.util.Pair;
+import cinema.util.SeatCoordinates;
 
 @Service
 public class CinemaServiceImpl implements CinemaService {
@@ -23,33 +25,26 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public SeatsResponse getAvailableSeats() {
-        final List<Pair<Integer, Integer>> availableSeats = cinemaRepository.getAvailableSeats();
+        final List<SeatCoordinates<Integer, Integer>> availableSeats = cinemaRepository.getAvailableSeats();
         final List<SeatDTO> availableSeatsDTO = new ArrayList<>();
 
-        for (final Pair<Integer, Integer> seat : availableSeats) {
-            availableSeatsDTO.add(new SeatDTO(seat.key(), seat.value()));
+        for (final SeatCoordinates<Integer, Integer> seatCoordinates : availableSeats) {
+            availableSeatsDTO.add(new SeatDTO(seatCoordinates.row(), seatCoordinates.col()));
         }
 
         return new SeatsResponse(cinemaRepository.getNumRows(), cinemaRepository.getNumCols(), availableSeatsDTO);
     }
 
     @Override
-    public boolean purchaseTicket(Map<String, String> result, int row, int col) {
-        boolean successful = false;
-
-        try {
-            if (cinemaRepository.isSeatAvailable(row, col)) {
-                result.put("price", Integer.toString(cinemaRepository.getTicketPrice(row)));
-                cinemaRepository.setSeatAvailable(row, col, false);
-                successful = true;
-            } else {
-                result.put("error", "The ticket has been already purchased!");
-            }
-        } catch (IllegalArgumentException e) {
-            result.put("error", "The number of a row or a column is out of bounds!");
+    public synchronized PurchaseResponse purchaseTicket(final int row, final int col) {
+        if (!cinemaRepository.isSeatAvailable(row, col)) {
+            throw new SeatAlreadyPurchasedException(ErrorMessages.SEAT_ALREADY_PURCHASED_ERR);
         }
 
-        return successful;
+        cinemaRepository.setSeatAvailable(row, col, false);
+        final int price = cinemaRepository.getTicketPrice(row);
+
+        return new PurchaseResponse(row, col, price);
     }
 
 }

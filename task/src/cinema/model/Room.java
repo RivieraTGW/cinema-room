@@ -1,5 +1,7 @@
 package cinema.model;
 
+import cinema.exception.ErrorMessages;
+
 public class Room {
 
     private final int numRows;
@@ -30,10 +32,9 @@ public class Room {
         return numCols;
     }
 
-    public Seat getSeat(int row, int col) {
+    public Seat getSeat(final int row, final int col) {
         if (row < 0 || row >= this.numRows || col < 0 || col >= this.numCols) {
-            throw new IllegalArgumentException("Seat (" + row + ", " + col + ") is out of bounds. " +
-                    "Valid range: rows 0-" + (this.numRows-1) + ", columns 0-" + (this.numCols-1) + ".");
+            throw new IllegalArgumentException(ErrorMessages.ROW_COL_OUT_OF_BOUNDS_ERR);
         }
 
         return seats[row][col];

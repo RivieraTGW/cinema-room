@@ -4,7 +4,7 @@ public class Seat {
 
     private final int row;
     private final int col;
-    private boolean available;
+    private volatile boolean available;
 
     public Seat(int row, int col, boolean available) {
         this.row = row;
@@ -24,7 +24,7 @@ public class Seat {
         return available;
     }
 
-    public void setAvailable(boolean available) {
+    public void setAvailable(final boolean available) {
         this.available = available;
     }
 }
