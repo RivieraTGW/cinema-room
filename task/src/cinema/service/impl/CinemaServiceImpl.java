@@ -25,10 +25,10 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public SeatsResponse getAvailableSeats() {
-        final List<SeatCoordinates<Integer, Integer>> availableSeats = cinemaRepository.getAvailableSeats();
+        final List<SeatCoordinates> availableSeats = cinemaRepository.getAvailableSeats();
         final List<SeatDTO> availableSeatsDTO = new ArrayList<>();
 
-        for (final SeatCoordinates<Integer, Integer> seatCoordinates : availableSeats) {
+        for (final SeatCoordinates seatCoordinates : availableSeats) {
             availableSeatsDTO.add(new SeatDTO(seatCoordinates.row(), seatCoordinates.col()));
         }
 

@@ -1,3 +1,3 @@
 package cinema.util;
 
-public record SeatCoordinates<R, C>(R row, C col) { }
+public record SeatCoordinates(int row, int col) { }

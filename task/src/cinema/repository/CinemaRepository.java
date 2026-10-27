@@ -38,14 +38,14 @@ public class CinemaRepository {
         this.room = new Room(numRows, numCols);
     }
 
-    public List<SeatCoordinates<Integer, Integer>> getAvailableSeats() {
-        final List<SeatCoordinates<Integer, Integer>> availableSeats = new ArrayList<>();
+    public List<SeatCoordinates> getAvailableSeats() {
+        final List<SeatCoordinates> availableSeats = new ArrayList<>();
 
         for (int row = 0; row < room.getNumRows(); row++) {
             for (int col = 0; col < room.getNumCols(); col++) {
                 final Seat seat = room.getSeat(row, col);
                 if (seat.isAvailable()) {
-                    availableSeats.add(new SeatCoordinates<>(row, col));
+                    availableSeats.add(new SeatCoordinates(row, col));
                 }
             }
         }
