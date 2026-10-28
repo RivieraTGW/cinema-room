@@ -2,6 +2,7 @@ package cinema.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -46,8 +47,10 @@ public class CinemaServiceImpl implements CinemaService {
 
         cinemaRepository.setSeatAvailable(row, col, false);
         final int price = cinemaRepository.getTicketPrice(row);
+        final UUID token = UUID.randomUUID();
+        cinemaRepository.savePurchase(token, row, col);
 
-        return new PurchaseResponse(row, col, price);
+        return new PurchaseResponse(token, row, col, price);
     }
 
 }

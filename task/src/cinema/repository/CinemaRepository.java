@@ -2,9 +2,14 @@ package cinema.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.stereotype.Component;
 
+import cinema.exception.ErrorMessages;
+import cinema.model.Purchase;
 import cinema.model.Room;
 import cinema.model.Seat;
 import cinema.util.SeatCoordinates;
@@ -34,8 +39,22 @@ public class CinemaRepository {
 
     private final Room room;
 
+    private ConcurrentMap<UUID, Purchase> purchases = new ConcurrentHashMap<>();
+
     public CinemaRepository() {
         this.room = new Room(numRows, numCols);
+    }
+
+    public void savePurchase(final UUID token, final int row, final int col) {
+        // TO-DO: Even though it's extremely unlikely, two exact same UUIDs can sometimes
+        // be generated. Right now such a case will throw an exception. This should be
+        // handled in a better way in the future.
+        if (purchases.containsKey(token)) {
+            throw new IllegalArgumentException(ErrorMessages.DUPLICATE_TOKEN_ERR);
+        }
+
+        final Purchase purchase = new Purchase(new SeatCoordinates(row, col));
+        purchases.put(token, purchase);
     }
 
     public List<SeatCoordinates> getAvailableSeats() {

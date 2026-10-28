@@ -1,9 +1,10 @@
 package cinema.dto;
 
-import cinema.util.SeatCoordinateConverter;
-import cinema.util.SeatCoordinates;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import cinema.util.SeatCoordinateConverter;
+import cinema.util.SeatCoordinates;
 
 public record PurchaseRequest(int row, int column) {
 
