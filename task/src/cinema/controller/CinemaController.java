@@ -4,7 +4,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
-import cinema.dto.*;
+import cinema.dto.PurchaseRequest;
+import cinema.dto.PurchaseResponse;
+import cinema.dto.ReturnResponse;
+import cinema.dto.ReturnRequest;
+import cinema.dto.SeatsResponse;
 import cinema.service.CinemaService;
 
 @RestController

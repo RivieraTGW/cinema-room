@@ -8,7 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import cinema.dto.*;
+import cinema.dto.PurchaseResponse;
+import cinema.dto.ReturnResponse;
+import cinema.dto.SeatDTO;
+import cinema.dto.SeatsResponse;
+import cinema.dto.TicketDTO;
 import cinema.exception.ErrorMessages;
 import cinema.exception.SeatAlreadyPurchasedException;
 import cinema.repository.CinemaRepository;
