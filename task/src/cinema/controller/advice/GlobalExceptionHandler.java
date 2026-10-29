@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import cinema.dto.ErrorResponse;
+import cinema.exception.InvalidTokenException;
 import cinema.exception.SeatAlreadyPurchasedException;
 
 @ControllerAdvice
@@ -23,4 +24,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleSeatAlreadyPurchased(InvalidTokenException e) {
+        ErrorResponse errorResponse = new ErrorResponse(e.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 }

@@ -8,11 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import cinema.dto.PurchaseResponse;
-import cinema.dto.SeatDTO;
-import cinema.dto.SeatsResponse;
-import cinema.exception.ErrorMessages;
-import cinema.exception.SeatAlreadyPurchasedException;
+import cinema.dto.*;
 import cinema.repository.CinemaRepository;
 import cinema.service.CinemaService;
 import cinema.util.SeatCoordinateConverter;
@@ -47,7 +43,12 @@ public class CinemaServiceImpl implements CinemaService {
     @Override
     public synchronized PurchaseResponse purchaseTicket(final int row, final int col) {
         // Note: If a real database was used, this method would be annotated as @Transactional
-        // to prevent data being written to only one table
+        // to prevent data being written to only one table.
+
+        // To-Do: The current solution has a weakness.
+        // If the server went down between setSeatAvailable() and savePurchase(), we would
+        // get into a state where the ticket would be marked as 'unavailable', but we would
+        // have no record of the purchase.
         final int price = cinemaRepository.getTicketPrice(row);
         cinemaRepository.setSeatAvailable(row, col, false);
         final UUID token = cinemaRepository.savePurchase(row, col);
@@ -57,6 +58,22 @@ public class CinemaServiceImpl implements CinemaService {
                 token, clientCoordinates.row(), clientCoordinates.col());
 
         return new PurchaseResponse(token, row, col, price);
+    }
+
+    @Override
+    public synchronized ReturnResponse returnTicket(final UUID token) {
+        // Note: In a real-life situation we would probably not want to delete a purchase,
+        // but rather just mark it as 'refunded'. I chose to delete it for simplicity.
+        // Also, this method would be annotated as @Transactional if a real database was used.
+        final SeatCoordinates seatCoordinates = cinemaRepository.deletePurchase(token);
+        final int price = cinemaRepository.getTicketPrice(seatCoordinates.row());
+
+        final SeatCoordinates clientCoordinates = SeatCoordinateConverter.toClientCoordinates(
+                seatCoordinates.row(), seatCoordinates.col());
+        logger.info("A ticket has been refunded. Token: {}, row: {}, column: {}",
+                token, clientCoordinates.row(), clientCoordinates.col());
+
+        return new ReturnResponse(new TicketDTO(seatCoordinates.row(), seatCoordinates.col(), price));
     }
 
 }

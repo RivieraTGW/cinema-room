@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.springframework.stereotype.Component;
 
 import cinema.exception.ErrorMessages;
+import cinema.exception.InvalidTokenException;
 import cinema.exception.SeatAlreadyPurchasedException;
 import cinema.model.Purchase;
 import cinema.model.Room;
@@ -72,6 +73,14 @@ public class CinemaRepository {
         purchases.put(token, purchase);
 
         return token;
+    }
+
+    public SeatCoordinates deletePurchase(final UUID token) {
+        if (!purchases.containsKey(token)) {
+            throw new InvalidTokenException(ErrorMessages.INVALID_TOKEN_ERR);
+        }
+
+        return purchases.remove(token).seatCoordinates();
     }
 
     public boolean isSeatAvailable(final int row, final int col) {
