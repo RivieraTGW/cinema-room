@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import cinema.dto.*;
+import cinema.exception.ErrorMessages;
+import cinema.exception.SeatAlreadyPurchasedException;
 import cinema.repository.CinemaRepository;
 import cinema.service.CinemaService;
 import cinema.util.SeatCoordinateConverter;
@@ -45,6 +47,10 @@ public class CinemaServiceImpl implements CinemaService {
         // Note: If a real database was used, this method would be annotated as @Transactional
         // to prevent data being written to only one table.
 
+        if (!cinemaRepository.isSeatAvailable(row, col)) {
+            throw new SeatAlreadyPurchasedException(ErrorMessages.SEAT_ALREADY_PURCHASED_ERR);
+        }
+
         // To-Do: The current solution has a weakness.
         // If the server went down between setSeatAvailable() and savePurchase(), we would
         // get into a state where the ticket would be marked as 'unavailable', but we would
@@ -65,7 +71,13 @@ public class CinemaServiceImpl implements CinemaService {
         // Note: In a real-life situation we would probably not want to delete a purchase,
         // but rather just mark it as 'refunded'. I chose to delete it for simplicity.
         // Also, this method would be annotated as @Transactional if a real database was used.
+
+        // To-Do: The current solution has a weakness.
+        // If the server went down between deletePurchase() and setSeatAvailable(), we would
+        // get into a state where the purchase would be deleted but the seat would not be marked
+        // as available again. This way, the seat would remain unavailable indefinitely.
         final SeatCoordinates seatCoordinates = cinemaRepository.deletePurchase(token);
+        cinemaRepository.setSeatAvailable(seatCoordinates.row(), seatCoordinates.col(), true);
         final int price = cinemaRepository.getTicketPrice(seatCoordinates.row());
 
         final SeatCoordinates clientCoordinates = SeatCoordinateConverter.toClientCoordinates(

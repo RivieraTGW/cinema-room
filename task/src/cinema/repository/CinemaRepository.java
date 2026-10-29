@@ -88,10 +88,6 @@ public class CinemaRepository {
     }
 
     public void setSeatAvailable(final int row, final int col, final boolean available) {
-        if (!isSeatAvailable(row, col)) {
-            throw new SeatAlreadyPurchasedException(ErrorMessages.SEAT_ALREADY_PURCHASED_ERR);
-        }
-
         room.getSeat(row, col).setAvailable(available);
     }
 
