@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.springframework.stereotype.Component;
 
 import cinema.exception.ErrorMessages;
+import cinema.exception.SeatAlreadyPurchasedException;
 import cinema.model.Purchase;
 import cinema.model.Room;
 import cinema.model.Seat;
@@ -38,23 +39,10 @@ public class CinemaRepository {
     private final int cheapSeatCost = 8;
 
     private final Room room;
-
-    private ConcurrentMap<UUID, Purchase> purchases = new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, Purchase> purchases = new ConcurrentHashMap<>();
 
     public CinemaRepository() {
         this.room = new Room(numRows, numCols);
-    }
-
-    public void savePurchase(final UUID token, final int row, final int col) {
-        // TO-DO: Even though it's extremely unlikely, two exact same UUIDs can sometimes
-        // be generated. Right now such a case will throw an exception. This should be
-        // handled in a better way in the future.
-        if (purchases.containsKey(token)) {
-            throw new IllegalArgumentException(ErrorMessages.DUPLICATE_TOKEN_ERR);
-        }
-
-        final Purchase purchase = new Purchase(new SeatCoordinates(row, col));
-        purchases.put(token, purchase);
     }
 
     public List<SeatCoordinates> getAvailableSeats() {
@@ -72,11 +60,29 @@ public class CinemaRepository {
         return availableSeats;
     }
 
+    public UUID savePurchase(final int row, final int col) {
+        // This is an edge case. In the off chance that the same UUID
+        // is generated for two purchases, regenerate a new UUID.
+        UUID token;
+        do {
+            token = UUID.randomUUID();
+        } while (purchases.containsKey(token));
+
+        final Purchase purchase = new Purchase(new SeatCoordinates(row, col));
+        purchases.put(token, purchase);
+
+        return token;
+    }
+
     public boolean isSeatAvailable(final int row, final int col) {
         return room.getSeat(row, col).isAvailable();
     }
 
     public void setSeatAvailable(final int row, final int col, final boolean available) {
+        if (!isSeatAvailable(row, col)) {
+            throw new SeatAlreadyPurchasedException(ErrorMessages.SEAT_ALREADY_PURCHASED_ERR);
+        }
+
         room.getSeat(row, col).setAvailable(available);
     }
 
@@ -94,6 +100,10 @@ public class CinemaRepository {
      * Rows above the threshold are cheaper; rows at or below the threshold are more expensive.
      */
     public int getTicketPrice(final int row) {
+        if (row < 0 || row >= room.getNumRows()) {
+            throw new IllegalArgumentException(ErrorMessages.ROW_COL_OUT_OF_BOUNDS_ERR);
+        }
+
         return row > expensiveRowThreshold ? cheapSeatCost : expensiveSeatCost;
     }
 

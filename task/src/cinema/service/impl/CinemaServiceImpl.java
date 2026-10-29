@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import cinema.dto.PurchaseResponse;
@@ -13,10 +15,13 @@ import cinema.exception.ErrorMessages;
 import cinema.exception.SeatAlreadyPurchasedException;
 import cinema.repository.CinemaRepository;
 import cinema.service.CinemaService;
+import cinema.util.SeatCoordinateConverter;
 import cinema.util.SeatCoordinates;
 
 @Service
 public class CinemaServiceImpl implements CinemaService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CinemaServiceImpl.class);
 
     private final CinemaRepository cinemaRepository;
 
@@ -41,14 +46,15 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public synchronized PurchaseResponse purchaseTicket(final int row, final int col) {
-        if (!cinemaRepository.isSeatAvailable(row, col)) {
-            throw new SeatAlreadyPurchasedException(ErrorMessages.SEAT_ALREADY_PURCHASED_ERR);
-        }
-
-        cinemaRepository.setSeatAvailable(row, col, false);
+        // Note: If a real database was used, this method would be annotated as @Transactional
+        // to prevent data being written to only one table
         final int price = cinemaRepository.getTicketPrice(row);
-        final UUID token = UUID.randomUUID();
-        cinemaRepository.savePurchase(token, row, col);
+        cinemaRepository.setSeatAvailable(row, col, false);
+        final UUID token = cinemaRepository.savePurchase(row, col);
+
+        final SeatCoordinates clientCoordinates =  SeatCoordinateConverter.toClientCoordinates(row, col);
+        logger.info("A new purchase has been made. Token: {}, row: {}, column: {}",
+                token, clientCoordinates.row(), clientCoordinates.col());
 
         return new PurchaseResponse(token, row, col, price);
     }
