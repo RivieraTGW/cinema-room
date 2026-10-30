@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.*;
 
 import cinema.dto.PurchaseRequest;
 import cinema.dto.PurchaseResponse;
-import cinema.dto.ReturnResponse;
 import cinema.dto.ReturnRequest;
 import cinema.dto.SeatsResponse;
+import cinema.dto.TicketDTO;
 import cinema.service.CinemaService;
 
 @RestController
@@ -28,16 +28,14 @@ public class CinemaController {
 
     @PostMapping("/purchase")
     public ResponseEntity<PurchaseResponse> purchaseTicket(@RequestBody @NonNull final PurchaseRequest purchaseRequest) {
-        final PurchaseResponse purchaseResponse = cinemaService.purchaseTicket(
-                purchaseRequest.row(),
-                purchaseRequest.column());
+        final PurchaseResponse purchaseResponse = cinemaService.purchaseTicket(purchaseRequest);
         return ResponseEntity.ok(purchaseResponse);
     }
 
     @PostMapping("/return")
-    public ResponseEntity<ReturnResponse> returnTicket(@RequestBody @NonNull final ReturnRequest returnRequest) {
-        final ReturnResponse returnResponse = cinemaService.returnTicket(returnRequest.token());
-        return ResponseEntity.ok(returnResponse);
+    public ResponseEntity<TicketDTO> returnTicket(@RequestBody @NonNull final ReturnRequest returnRequest) {
+        final TicketDTO ticket = cinemaService.returnTicket(returnRequest);
+        return ResponseEntity.ok(ticket);
     }
 
 }

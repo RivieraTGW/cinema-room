@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import cinema.exception.ErrorMessages;
 import cinema.exception.InvalidTokenException;
-import cinema.exception.SeatAlreadyPurchasedException;
 import cinema.model.Purchase;
 import cinema.model.Room;
 import cinema.model.Seat;
@@ -26,7 +25,7 @@ import cinema.util.SeatCoordinates;
 public class CinemaRepository {
 
     /**
-     * These values are hardcoded only for the purpose of this task.
+     * These values are hardcoded only for the purpose of this project.
      * They are used to initialize the cinema repository.
      */
     private final int numRows = 9;
@@ -47,10 +46,10 @@ public class CinemaRepository {
     }
 
     public List<SeatCoordinates> getAvailableSeats() {
+        // Starting iterating from one, because seat indices are 1-based
         final List<SeatCoordinates> availableSeats = new ArrayList<>();
-
-        for (int row = 0; row < room.getNumRows(); row++) {
-            for (int col = 0; col < room.getNumCols(); col++) {
+        for (int row = 1; row <= room.getNumRows(); row++) {
+            for (int col = 1; col <= room.getNumCols(); col++) {
                 final Seat seat = room.getSeat(row, col);
                 if (seat.isAvailable()) {
                     availableSeats.add(new SeatCoordinates(row, col));
@@ -83,6 +82,14 @@ public class CinemaRepository {
         return purchases.remove(token).seatCoordinates();
     }
 
+    public int getTicketPrice(final int row) {
+        if (row < 1 || row > room.getNumRows()) {
+            throw new IllegalArgumentException(ErrorMessages.ROW_COL_OUT_OF_BOUNDS_ERR);
+        }
+
+        return row > expensiveRowThreshold ? cheapSeatCost : expensiveSeatCost;
+    }
+
     public boolean isSeatAvailable(final int row, final int col) {
         return room.getSeat(row, col).isAvailable();
     }
@@ -98,18 +105,4 @@ public class CinemaRepository {
     public int getNumCols() {
         return room.getNumCols();
     }
-
-    /**
-     * Returns the price of a ticket at the specified row.
-     * Assumes the row value is already validated by the caller.
-     * Rows above the threshold are cheaper; rows at or below the threshold are more expensive.
-     */
-    public int getTicketPrice(final int row) {
-        if (row < 0 || row >= room.getNumRows()) {
-            throw new IllegalArgumentException(ErrorMessages.ROW_COL_OUT_OF_BOUNDS_ERR);
-        }
-
-        return row > expensiveRowThreshold ? cheapSeatCost : expensiveSeatCost;
-    }
-
 }
