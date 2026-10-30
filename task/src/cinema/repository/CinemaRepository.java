@@ -38,7 +38,7 @@ public class CinemaRepository {
     /**
      * Seats on or below this row are more expensive.
      */
-    private final int expensiveRowThreshold = 3;
+    private final int expensiveRowThreshold = 4;
     private final int expensiveSeatCost = 10;
     private final int cheapSeatCost = 8;
 
@@ -112,7 +112,7 @@ public class CinemaRepository {
             throw new IllegalArgumentException(ErrorMessages.ROW_COL_OUT_OF_BOUNDS_ERR);
         }
 
-        return row >= expensiveRowThreshold ? cheapSeatCost : expensiveSeatCost;
+        return row > expensiveRowThreshold ? cheapSeatCost : expensiveSeatCost;
     }
 
     public boolean isSeatAvailable(final int row, final int col) {

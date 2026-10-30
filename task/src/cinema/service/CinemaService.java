@@ -3,9 +3,9 @@ package cinema.service;
 import cinema.dto.PurchaseRequest;
 import cinema.dto.PurchaseResponse;
 import cinema.dto.ReturnRequest;
+import cinema.dto.ReturnResponse;
 import cinema.dto.SeatsResponse;
 import cinema.dto.StatsResponse;
-import cinema.dto.TicketDTO;
 
 public interface CinemaService {
 
@@ -24,7 +24,7 @@ public interface CinemaService {
      * Refunds a ticket using the given purchase token.
      * Only one refund can be processed at a time.
      */
-    TicketDTO returnTicket(ReturnRequest returnRequest);
+    ReturnResponse returnTicket(ReturnRequest returnRequest);
 
     /**
      * Returns cinema statistics if the password is correct.

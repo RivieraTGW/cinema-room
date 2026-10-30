@@ -76,7 +76,7 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public synchronized TicketDTO returnTicket(final ReturnRequest returnRequest) {
+    public synchronized ReturnResponse returnTicket(final ReturnRequest returnRequest) {
         // Note: In a real-life situation we would probably not want to delete a purchase,
         // but rather just mark it as 'refunded'. I chose to delete it for simplicity.
         // Also, this method would be annotated as @Transactional if a real database was used
@@ -94,7 +94,7 @@ public class CinemaServiceImpl implements CinemaService {
         logger.info("A ticket has been refunded. Token: {}, row: {}, column: {}",
                 returnRequest.token(), seatCoordinates.row(), seatCoordinates.col());
 
-        return new TicketDTO(seatCoordinates.row(), seatCoordinates.col(), price);
+        return new ReturnResponse(new TicketDTO(seatCoordinates.row(), seatCoordinates.col(), price));
     }
 
     @Override
