@@ -8,6 +8,7 @@ import cinema.dto.PurchaseRequest;
 import cinema.dto.PurchaseResponse;
 import cinema.dto.ReturnRequest;
 import cinema.dto.SeatsResponse;
+import cinema.dto.StatsResponse;
 import cinema.dto.TicketDTO;
 import cinema.service.CinemaService;
 
@@ -36,6 +37,12 @@ public class CinemaController {
     public ResponseEntity<TicketDTO> returnTicket(@RequestBody @NonNull final ReturnRequest returnRequest) {
         final TicketDTO ticket = cinemaService.returnTicket(returnRequest);
         return ResponseEntity.ok(ticket);
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<StatsResponse> getStatistics(@RequestParam(required = false) final String password) {
+        final StatsResponse statsResponse = cinemaService.getStatistics(password);
+        return ResponseEntity.ok(statsResponse);
     }
 
 }

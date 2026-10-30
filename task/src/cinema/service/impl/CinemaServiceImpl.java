@@ -1,6 +1,8 @@
 package cinema.service.impl;
 
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,10 +12,13 @@ import org.springframework.stereotype.Service;
 
 import cinema.dto.*;
 import cinema.exception.ErrorMessages;
+import cinema.exception.IncorrectPasswordException;
 import cinema.exception.SeatAlreadyPurchasedException;
 import cinema.repository.CinemaRepository;
 import cinema.service.CinemaService;
+import cinema.util.HashUtil;
 import cinema.util.SeatCoordinates;
+import cinema.util.StatisticsData;
 
 @Service
 public class CinemaServiceImpl implements CinemaService {
@@ -90,5 +95,22 @@ public class CinemaServiceImpl implements CinemaService {
                 returnRequest.token(), seatCoordinates.row(), seatCoordinates.col());
 
         return new TicketDTO(seatCoordinates.row(), seatCoordinates.col(), price);
+    }
+
+    @Override
+    public synchronized StatsResponse getStatistics(final String password) {
+        if (password == null) {
+            throw new IncorrectPasswordException(ErrorMessages.INCORRECT_PASSWORD_ERR);
+        }
+
+        // Incorrect password
+        final byte[] passwordHash = HashUtil.calculateSha256Hash(password);
+        if (!MessageDigest.isEqual(passwordHash, cinemaRepository.getPasswordHash())) {
+            throw new IncorrectPasswordException(ErrorMessages.INCORRECT_PASSWORD_ERR);
+        }
+
+        final StatisticsData statistics = cinemaRepository.getStatistics();
+
+        return new StatsResponse(statistics.income(), statistics.availableSeats(), statistics.purchasedTickets());
     }
 }

@@ -13,7 +13,10 @@ import cinema.exception.InvalidTokenException;
 import cinema.model.Purchase;
 import cinema.model.Room;
 import cinema.model.Seat;
+import cinema.model.Statistics;
+import cinema.util.HashUtil;
 import cinema.util.SeatCoordinates;
+import cinema.util.StatisticsData;
 
 /**
  * This is a simple implementation of an in-memory repository. This project will not use a database,
@@ -30,6 +33,7 @@ public class CinemaRepository {
      */
     private final int numRows = 9;
     private final int numCols = 9;
+    private byte[] passwordHash = HashUtil.calculateSha256Hash("super_secret");
 
     /**
      * Seats on or below this row are more expensive.
@@ -40,9 +44,11 @@ public class CinemaRepository {
 
     private final Room room;
     private final ConcurrentMap<UUID, Purchase> purchases = new ConcurrentHashMap<>();
+    private final Statistics statistics;
 
     public CinemaRepository() {
         this.room = new Room(numRows, numCols);
+        this.statistics = new Statistics(numRows * numCols);
     }
 
     public List<SeatCoordinates> getAvailableSeats() {
@@ -71,6 +77,11 @@ public class CinemaRepository {
         final Purchase purchase = new Purchase(new SeatCoordinates(row, col));
         purchases.put(token, purchase);
 
+        // Update the statistics
+        statistics.incrementPurchasedTickets();
+        statistics.decrementAvailableSeats();
+        statistics.addIncome(getTicketPrice(row));
+
         return token;
     }
 
@@ -79,7 +90,21 @@ public class CinemaRepository {
             throw new InvalidTokenException(ErrorMessages.INVALID_TOKEN_ERR);
         }
 
-        return purchases.remove(token).seatCoordinates();
+        final Purchase purchase = purchases.remove(token);
+
+        // Update the statistics
+        statistics.decrementPurchasedTickets();
+        statistics.incrementAvailableSeats();
+        statistics.subtractIncome(getTicketPrice(purchase.seatCoordinates().row()));
+
+        return purchase.seatCoordinates();
+    }
+
+    public StatisticsData getStatistics() {
+        return new StatisticsData(
+                statistics.getIncome(),
+                statistics.getAvailableSeats(),
+                statistics.getPurchasedTickets());
     }
 
     public int getTicketPrice(final int row) {
@@ -104,5 +129,9 @@ public class CinemaRepository {
 
     public int getNumCols() {
         return room.getNumCols();
+    }
+
+    public byte[] getPasswordHash() {
+        return passwordHash.clone();
     }
 }

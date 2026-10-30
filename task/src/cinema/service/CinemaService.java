@@ -1,27 +1,33 @@
 package cinema.service;
 
-import java.util.UUID;
-
-import cinema.dto.*;
+import cinema.dto.PurchaseRequest;
+import cinema.dto.PurchaseResponse;
+import cinema.dto.ReturnRequest;
+import cinema.dto.SeatsResponse;
+import cinema.dto.StatsResponse;
+import cinema.dto.TicketDTO;
 
 public interface CinemaService {
 
     /**
      * Returns a list of available seats.
-     * This method is thread-safe.
      */
     SeatsResponse getAvailableSeats();
 
     /**
      * Purchases a ticket at the specified seat.
-     * This method is thread-safe: only one purchase can be processed at a time.
+     * Only one purchase can be processed at a time.
      */
     PurchaseResponse purchaseTicket(PurchaseRequest purchaseRequest);
 
     /**
      * Refunds a ticket using the given purchase token.
-     * This method is thread-safe: only one refund can be processed at a time.
+     * Only one refund can be processed at a time.
      */
     TicketDTO returnTicket(ReturnRequest returnRequest);
 
+    /**
+     * Returns cinema statistics if the password is correct.
+     */
+    StatsResponse getStatistics(String password);
 }
