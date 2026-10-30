@@ -112,7 +112,7 @@ public class CinemaRepository {
             throw new IllegalArgumentException(ErrorMessages.ROW_COL_OUT_OF_BOUNDS_ERR);
         }
 
-        return row > expensiveRowThreshold ? cheapSeatCost : expensiveSeatCost;
+        return row >= expensiveRowThreshold ? cheapSeatCost : expensiveSeatCost;
     }
 
     public boolean isSeatAvailable(final int row, final int col) {
