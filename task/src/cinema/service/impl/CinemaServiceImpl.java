@@ -2,7 +2,6 @@ package cinema.service.impl;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,7 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import cinema.dto.*;
+import cinema.dto.PurchaseRequest;
+import cinema.dto.PurchaseResponse;
+import cinema.dto.ReturnRequest;
+import cinema.dto.ReturnResponse;
+import cinema.dto.SeatDTO;
+import cinema.dto.SeatsResponse;
+import cinema.dto.StatsResponse;
+import cinema.dto.TicketDTO;
 import cinema.exception.ErrorMessages;
 import cinema.exception.IncorrectPasswordException;
 import cinema.exception.SeatAlreadyPurchasedException;
