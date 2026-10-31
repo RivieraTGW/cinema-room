@@ -1,4 +1,4 @@
-# Cinema room REST service
+# Cinema Room REST Service
 This is a REST service for managing a cinema room with 81 seats (9 rows and 9 columns), built as a learning project 
 to practice backend development with Java and Spring Boot. This project is a part of a learning course provided by 
 Hyperskill.
